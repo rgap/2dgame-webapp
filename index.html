@@ -150,19 +150,13 @@
       function gameLoop() {
         container.innerHTML = JSON.stringify(key);
 
-        // Movement logic
-        if (key[87]) player.y -= 2.5; // W
-        if (key[65]) player.x -= 2.5; // A
-        if (key[83]) player.y += 2.5; // S
-        if (key[68]) player.x += 2.5; // D
-
         // Movement logic with boundary checks
-        // if (key[87] && player.y - player.height / 2 > 0) player.y -= 2.5; // W
-        // if (key[65] && player.x - player.width / 2 > 0) player.x -= 2.5; // A
-        // if (key[83] && player.y + player.height / 2 < app.view.height)
-        //   player.y += 2.5; // S
-        // if (key[68] && player.x + player.width / 2 < app.view.width)
-        //   player.x += 2.5; // D
+        if (key[87] && player.y - player.height / 2 > 0) player.y -= 2.5; // W
+        if (key[65] && player.x - player.width / 2 > 0) player.x -= 2.5; // A
+        if (key[83] && player.y + player.height / 2 < app.view.height)
+          player.y += 2.5; // S
+        if (key[68] && player.x + player.width / 2 < app.view.width)
+          player.x += 2.5; // D
 
         // Banner logic
         let dist = distanceBetween(player, marsBanner);
