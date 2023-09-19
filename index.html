@@ -13,6 +13,11 @@
         box-sizing: border-box;
         display: none; /* hidden by default */
       }
+      /* Make the canvas responsive */
+      canvas {
+        max-width: 100%;
+        height: auto;
+      }
     </style>
     <script src="./js/pixi.min.js"></script>
     <script>
@@ -26,6 +31,7 @@
       let marsBanner;
 
       let itinerary = [];
+      let touchStartPos = { x: 0, y: 0 };
 
       // Clase para el jugador
       class Player {
@@ -68,12 +74,18 @@
 
       // Función principal al cargar la ventana
       window.onload = function () {
-        // Inicializar la aplicación PIXI
+        // Initialize PIXI application with window dimensions
         app = new PIXI.Application({
-          width: 800,
-          height: 600,
+          width: window.innerWidth,
+          height: window.innerHeight,
           backgroundColor: 0xaaaaaa,
         });
+
+        // Resize the canvas when the window is resized
+        window.addEventListener("resize", function () {
+          app.renderer.resize(window.innerWidth, window.innerHeight);
+        });
+
         document.body.appendChild(app.view);
         canvasContainer = document.querySelector("#canvas-container");
         itineraryContainer = document.querySelector("#itinerary-container");
@@ -106,6 +118,10 @@
 
         // Bucle principal del juego
         app.ticker.add(gameLoop);
+
+        // Add touch event listeners for mobile controls
+        app.view.addEventListener("touchstart", handleTouchStart);
+        app.view.addEventListener("touchmove", handleTouchMove);
       }
 
       // Dibujar paredes
@@ -244,6 +260,34 @@
           itinerary.push(celestialBody);
           updateItineraryDisplay();
         }
+      }
+
+      function handleTouchStart(e) {
+        touchStartPos.x = e.touches[0].clientX;
+        touchStartPos.y = e.touches[0].clientY;
+      }
+
+      function handleTouchMove(e) {
+        let touchCurrentPos = {
+          x: e.touches[0].clientX,
+          y: e.touches[0].clientY,
+        };
+
+        let dx = touchCurrentPos.x - touchStartPos.x;
+        let dy = touchCurrentPos.y - touchStartPos.y;
+
+        if (Math.abs(dx) > Math.abs(dy)) {
+          // Horizontal movement
+          if (dx > 0) player.moveRight();
+          else player.moveLeft();
+        } else {
+          // Vertical movement
+          if (dy > 0) player.moveDown();
+          else player.moveUp();
+        }
+
+        // Update start position for next movement
+        touchStartPos = touchCurrentPos;
       }
 
       // Bucle principal del juego
