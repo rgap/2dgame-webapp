@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Space App</title>
+    <script src="./js/pixi.min.js"></script>
+    <script>
+      let app;
+      let player;
+      let key = {};
+      let container;
+
+      window.onload = function () {
+        app = new PIXI.Application({
+          width: 800,
+          height: 600,
+          backgroundColor: 0xaaaaaa,
+        });
+
+        document.body.appendChild(app.view);
+
+        // player object
+        player = PIXI.Sprite.from("./images/player.png");
+        player.anchor.set(0.5);
+        player.x = app.view.width / 2;
+        player.y = app.view.height / 2;
+
+        app.stage.addChild(player);
+
+        // keyboard event handlers
+        window.addEventListener("keydown", keysDown);
+        window.addEventListener("keyup", keysUp);
+
+        app.ticker.add(gameLoop);
+
+        container = document.querySelector("#container");
+      };
+
+      function keysDown(e) {
+        if ([87, 65, 83, 68].includes(e.keyCode)) {
+          key[e.keyCode] = true;
+        }
+      }
+
+      function keysUp(e) {
+        if ([87, 65, 83, 68].includes(e.keyCode)) {
+          key[e.keyCode] = false;
+        }
+      }
+
+      function gameLoop() {
+        container.innerHTML = JSON.stringify(key);
+
+        // Movement logic
+        if (key[87]) player.y -= 2.5; // W
+        if (key[65]) player.x -= 2.5; // A
+        if (key[83]) player.y += 2.5; // S
+        if (key[68]) player.x += 2.5; // D
+      }
+    </script>
+  </head>
+  <body>
+    <div id="container"></div>
+  </body>
+</html>

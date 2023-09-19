@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Space App</title>
+    <script src="./js/pixi.min.js"></script>
+    <script>
+      let app;
+      let player;
+      let key = {};
+      let container;
+      let marsDescription;
+      let marsBanner;
+
+      window.onload = function () {
+        app = new PIXI.Application({
+          width: 800,
+          height: 600,
+          backgroundColor: 0xaaaaaa,
+        });
+        document.body.appendChild(app.view);
+        container = document.querySelector("#container");
+
+        setPlayerAspects();
+        drawBackgroundAssets();
+        drawControlPanel();
+        drawSeats();
+        drawWindows();
+        clickableBanner();
+
+        drawWalls();
+      };
+
+      function setPlayerAspects() {
+        // player object
+        player = PIXI.Sprite.from("./images/player.png");
+        player.anchor.set(0.5);
+        player.x = app.view.width / 2;
+        player.y = app.view.height / 2;
+
+        app.stage.addChild(player);
+
+        // keyboard event handlers
+        window.addEventListener("keydown", keysDown);
+        window.addEventListener("keyup", keysUp);
+
+        app.ticker.add(gameLoop);
+      }
+
+      function drawWalls() {
+        let wallThickness = 10; // Adjust as needed
+
+        let topWall = new PIXI.Graphics();
+        topWall.beginFill(0x000000); // Black color for the wall
+        topWall.drawRect(0, 0, app.view.width, wallThickness);
+        app.stage.addChild(topWall);
+
+        let bottomWall = new PIXI.Graphics();
+        bottomWall.beginFill(0x000000);
+        bottomWall.drawRect(
+          0,
+          app.view.height - wallThickness,
+          app.view.width,
+          wallThickness
+        );
+        app.stage.addChild(bottomWall);
+
+        let leftWall = new PIXI.Graphics();
+        leftWall.beginFill(0x000000);
+        leftWall.drawRect(0, 0, wallThickness, app.view.height);
+        app.stage.addChild(leftWall);
+
+        let rightWall = new PIXI.Graphics();
+        rightWall.beginFill(0x000000);
+        rightWall.drawRect(
+          app.view.width - wallThickness,
+          0,
+          wallThickness,
+          app.view.height
+        );
+        app.stage.addChild(rightWall);
+      }
+
+      function drawBackgroundAssets() {
+        let background = PIXI.Sprite.from("./images/space_background.jpg");
+        background.width = app.view.width; // Stretch the background to fit the canvas
+        background.height = app.view.height;
+        app.stage.addChildAt(background, 0); // Ensure the background is the bottom-most layer
+      }
+
+      function drawControlPanel() {
+        let controlPanel = PIXI.Sprite.from("./images/panel.png");
+        controlPanel.position.set(50, app.view.height - 150); // Example position
+        app.stage.addChild(controlPanel);
+      }
+
+      function drawSeats() {
+        let seat = PIXI.Sprite.from("./images/seat.png");
+        seat.position.set(200, app.view.height - 100); // Example position
+        app.stage.addChild(seat);
+      }
+
+      function drawWindows() {
+        let windowView = PIXI.Sprite.from("./images/window.png");
+        windowView.position.set(400, 50); // Example position
+        app.stage.addChild(windowView);
+      }
+
+      function clickableBanner() {
+        marsBanner = PIXI.Sprite.from("./images/mars_banner.png");
+        marsBanner.position.set(600, 300); // Example position
+        app.stage.addChild(marsBanner);
+
+        marsDescription = new PIXI.Text("Mars is the fourth planet...", {
+          fontFamily: "Arial",
+          fontSize: 24,
+          fill: 0xffffff,
+        });
+        marsDescription.position.set(580, 350); // Adjust position as needed
+        marsDescription.visible = false; // Start off hidden
+        marsDescription.interactive = true;
+        marsDescription.buttonMode = true;
+        marsDescription.on("pointerdown", redirectToMarsPage);
+        app.stage.addChild(marsDescription);
+      }
+
+      function distanceBetween(obj1, obj2) {
+        let dx = obj1.x - obj2.x;
+        let dy = obj1.y - obj2.y;
+        return Math.sqrt(dx * dx + dy * dy);
+      }
+
+      function redirectToMarsPage() {
+        window.open("https://www.nasa.gov/planet-mars", "_blank");
+      }
+
+      function keysDown(e) {
+        if ([87, 65, 83, 68].includes(e.keyCode)) {
+          key[e.keyCode] = true;
+        }
+      }
+
+      function keysUp(e) {
+        if ([87, 65, 83, 68].includes(e.keyCode)) {
+          key[e.keyCode] = false;
+        }
+      }
+
+      function gameLoop() {
+        container.innerHTML = JSON.stringify(key);
+
+        // Movement logic
+        // if (key[87]) player.y -= 2.5; // W
+        // if (key[65]) player.x -= 2.5; // A
+        // if (key[83]) player.y += 2.5; // S
+        // if (key[68]) player.x += 2.5; // D
+
+        // Movement logic with boundary checks
+        if (key[87] && player.y - player.height / 2 > 0) player.y -= 2.5; // W
+        if (key[65] && player.x - player.width / 2 > 0) player.x -= 2.5; // A
+        if (key[83] && player.y + player.height / 2 < app.view.height)
+          player.y += 2.5; // S
+        if (key[68] && player.x + player.width / 2 < app.view.width)
+          player.x += 2.5; // D
+
+        // Banner logic
+        let dist = distanceBetween(player, marsBanner);
+        if (marsDescription) {
+          if (dist < 100) {
+            marsDescription.visible = true;
+          } else {
+            marsDescription.visible = false;
+          }
+        }
+
+        // Movement logic with boundary checks
+        if (key[87] && player.y - player.height / 2 > 0) player.y -= 2.5; // W
+        if (key[65] && player.x - player.width / 2 > 0) player.x -= 2.5; // A
+        if (key[83] && player.y + player.height / 2 < app.view.height)
+          player.y += 2.5; // S
+        if (key[68] && player.x + player.width / 2 < app.view.width)
+          player.x += 2.5; // D
+      }
+    </script>
+  </head>
+  <body>
+    <section id="container"></section>
+  </body>
+</html>
