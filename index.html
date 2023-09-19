@@ -9,9 +9,13 @@
       let app;
       let player;
       let key = {};
-      let container;
+      let canvasContainer;
+
+      let itineraryContainer;
       let marsDescription;
       let marsBanner;
+
+      let itinerary = [];
 
       window.onload = function () {
         app = new PIXI.Application({
@@ -20,7 +24,8 @@
           backgroundColor: 0xaaaaaa,
         });
         document.body.appendChild(app.view);
-        container = document.querySelector("#container");
+        canvasContainer = document.querySelector("#canvas-container");
+        itineraryContainer = document.querySelector("#itinerary-container");
 
         setPlayerAspects();
         drawBackgroundAssets();
@@ -30,6 +35,7 @@
         clickableBanner();
 
         drawWalls();
+        drawItineraryButton();
       };
 
       function setPlayerAspects() {
@@ -118,10 +124,14 @@
           fill: 0xffffff,
         });
         marsDescription.position.set(580, 350); // Adjust position as needed
-        marsDescription.visible = false; // Start off hidden
+        marsDescription.visible = false; // Start off hiddena
         marsDescription.interactive = true;
         marsDescription.buttonMode = true;
-        marsDescription.on("pointerdown", redirectToMarsPage);
+        marsDescription.on("pointerdown", function () {
+          addToItinerary("Mars");
+          redirectToMarsPage();
+        });
+
         app.stage.addChild(marsDescription);
       }
 
@@ -147,8 +157,40 @@
         }
       }
 
+      function drawItineraryButton() {
+        let viewItineraryButton = PIXI.Sprite.from(
+          "./images/view_itinerary_icon.png"
+        );
+        viewItineraryButton.position.set(700, 50); // Example position
+        viewItineraryButton.interactive = true;
+        viewItineraryButton.buttonMode = true;
+        viewItineraryButton.on("pointerdown", function () {
+          // Logic to display the itinerary, e.g., show the container div
+          itineraryContainer.style.display = "block";
+        });
+        app.stage.addChild(viewItineraryButton);
+      }
+
+      // Itinerary display
+      function updateItineraryDisplay() {
+        let itineraryList = "<ul>";
+        for (let destination of itinerary) {
+          itineraryList += `<li>${destination}</li>`;
+        }
+        itineraryList += "</ul>";
+        itineraryContainer.innerHTML = itineraryList;
+      }
+
+      // Itinerary logic
+      function addToItinerary(celestialBody) {
+        if (!itinerary.includes(celestialBody)) {
+          itinerary.push(celestialBody);
+          updateItineraryDisplay();
+        }
+      }
+
       function gameLoop() {
-        container.innerHTML = JSON.stringify(key);
+        canvasContainer.innerHTML = JSON.stringify(key);
 
         // Movement logic with boundary checks
         if (key[87] && player.y - player.height / 2 > 0) player.y -= 2.5; // W
@@ -171,6 +213,7 @@
     </script>
   </head>
   <body>
-    <section id="container"></section>
+    <section id="canvas-container"></section>
+    <section id="itinerary-container"></section>
   </body>
 </html>
