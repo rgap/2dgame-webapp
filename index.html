@@ -4,6 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Space App</title>
+    <style>
+      #container {
+        width: 100%;
+        background-color: rgba(0, 0, 0, 0.7); /* semi-transparent black */
+        color: white;
+        padding: 20px;
+        box-sizing: border-box;
+        display: none; /* hidden by default */
+      }
+    </style>
     <script src="./js/pixi.min.js"></script>
     <script>
       let app;
@@ -17,7 +27,48 @@
 
       let itinerary = [];
 
+      // Clase para el jugador
+      class Player {
+        constructor(x, y, texture) {
+          this.sprite = PIXI.Sprite.from(texture);
+          this.sprite.anchor.set(0.5);
+          this.sprite.x = x;
+          this.sprite.y = y;
+        }
+
+        // Mover hacia arriba
+        moveUp() {
+          if (this.sprite.y - this.sprite.height / 2 > 0) this.sprite.y -= 2.5;
+        }
+
+        // Mover hacia abajo
+        moveDown() {
+          if (this.sprite.y + this.sprite.height / 2 < app.view.height)
+            this.sprite.y += 2.5;
+        }
+
+        // Mover a la izquierda
+        moveLeft() {
+          if (this.sprite.x - this.sprite.width / 2 > 0) this.sprite.x -= 2.5;
+        }
+
+        // Mover a la derecha
+        moveRight() {
+          if (this.sprite.x + this.sprite.width / 2 < app.view.width)
+            this.sprite.x += 2.5;
+        }
+
+        // Calcular distancia a otro objeto
+        distanceTo(obj) {
+          let dx = this.sprite.x - obj.x;
+          let dy = this.sprite.y - obj.y;
+          return Math.sqrt(dx * dx + dy * dy);
+        }
+      }
+
+      // Función principal al cargar la ventana
       window.onload = function () {
+        // Inicializar la aplicación PIXI
         app = new PIXI.Application({
           width: 800,
           height: 600,
@@ -27,33 +78,37 @@
         canvasContainer = document.querySelector("#canvas-container");
         itineraryContainer = document.querySelector("#itinerary-container");
 
-        setPlayerAspects();
+        // Inicializar el jugador, fondo y otros elementos
+        initializePlayer();
         drawBackgroundAssets();
         drawControlPanel();
         drawSeats();
         drawWindows();
         clickableBanner();
 
+        // Dibujar paredes y botón de itinerario
         drawWalls();
         drawItineraryButton();
       };
 
-      function setPlayerAspects() {
-        // player object
-        player = PIXI.Sprite.from("./images/player.png");
-        player.anchor.set(0.5);
-        player.x = app.view.width / 2;
-        player.y = app.view.height / 2;
+      // Inicializar el jugador
+      function initializePlayer() {
+        player = new Player(
+          app.view.width / 2,
+          app.view.height / 2,
+          "./images/player.png"
+        );
+        app.stage.addChild(player.sprite);
 
-        app.stage.addChild(player);
-
-        // keyboard event handlers
+        // Eventos de teclado
         window.addEventListener("keydown", keysDown);
         window.addEventListener("keyup", keysUp);
 
+        // Bucle principal del juego
         app.ticker.add(gameLoop);
       }
 
+      // Dibujar paredes
       function drawWalls() {
         let wallThickness = 10; // Adjust as needed
 
@@ -88,6 +143,7 @@
         app.stage.addChild(rightWall);
       }
 
+      // Dibujar fondo
       function drawBackgroundAssets() {
         let background = PIXI.Sprite.from("./images/space_background.jpg");
         background.width = app.view.width; // Stretch the background to fit the canvas
@@ -95,24 +151,28 @@
         app.stage.addChildAt(background, 0); // Ensure the background is the bottom-most layer
       }
 
+      // Dibujar panel de control
       function drawControlPanel() {
         let controlPanel = PIXI.Sprite.from("./images/panel.png");
         controlPanel.position.set(50, app.view.height - 150); // Example position
         app.stage.addChild(controlPanel);
       }
 
+      // Dibujar asientos
       function drawSeats() {
         let seat = PIXI.Sprite.from("./images/seat.png");
         seat.position.set(200, app.view.height - 100); // Example position
         app.stage.addChild(seat);
       }
 
+      // Dibujar ventanas
       function drawWindows() {
         let windowView = PIXI.Sprite.from("./images/window.png");
         windowView.position.set(400, 50); // Example position
         app.stage.addChild(windowView);
       }
 
+      // Dibujar banner interactivo
       function clickableBanner() {
         marsBanner = PIXI.Sprite.from("./images/mars_banner.png");
         marsBanner.position.set(600, 300); // Example position
@@ -135,16 +195,12 @@
         app.stage.addChild(marsDescription);
       }
 
-      function distanceBetween(obj1, obj2) {
-        let dx = obj1.x - obj2.x;
-        let dy = obj1.y - obj2.y;
-        return Math.sqrt(dx * dx + dy * dy);
-      }
-
+      // Redirigir a la página de Marte
       function redirectToMarsPage() {
         window.open("https://www.nasa.gov/planet-mars", "_blank");
       }
 
+      // Eventos de teclado
       function keysDown(e) {
         if ([87, 65, 83, 68].includes(e.keyCode)) {
           key[e.keyCode] = true;
@@ -157,6 +213,7 @@
         }
       }
 
+      // Dibujar botón de itinerario
       function drawItineraryButton() {
         let viewItineraryButton = PIXI.Sprite.from(
           "./images/view_itinerary_icon.png"
@@ -171,7 +228,7 @@
         app.stage.addChild(viewItineraryButton);
       }
 
-      // Itinerary display
+      // Actualizar visualización del itinerario
       function updateItineraryDisplay() {
         let itineraryList = "<ul>";
         for (let destination of itinerary) {
@@ -181,7 +238,7 @@
         itineraryContainer.innerHTML = itineraryList;
       }
 
-      // Itinerary logic
+      // Añadir al itinerario
       function addToItinerary(celestialBody) {
         if (!itinerary.includes(celestialBody)) {
           itinerary.push(celestialBody);
@@ -189,24 +246,21 @@
         }
       }
 
+      // Bucle principal del juego
       function gameLoop() {
-        canvasContainer.innerHTML = JSON.stringify(key);
+        // Actualizar la posición del jugador según las teclas presionadas
+        if (key[87]) player.moveUp(); // Mover hacia arriba con la tecla W
+        if (key[65]) player.moveLeft(); // Mover a la izquierda con la tecla A
+        if (key[83]) player.moveDown(); // Mover hacia abajo con la tecla S
+        if (key[68]) player.moveRight(); // Mover a la derecha con la tecla D
 
-        // Movement logic with boundary checks
-        if (key[87] && player.y - player.height / 2 > 0) player.y -= 2.5; // W
-        if (key[65] && player.x - player.width / 2 > 0) player.x -= 2.5; // A
-        if (key[83] && player.y + player.height / 2 < app.view.height)
-          player.y += 2.5; // S
-        if (key[68] && player.x + player.width / 2 < app.view.width)
-          player.x += 2.5; // D
-
-        // Banner logic
-        let dist = distanceBetween(player, marsBanner);
+        // Lógica del banner: mostrar descripción si el jugador está cerca
+        let dist = player.distanceTo(marsBanner);
         if (marsDescription) {
           if (dist < 100) {
-            marsDescription.visible = true;
+            marsDescription.visible = true; // Mostrar descripción si el jugador está a menos de 100 unidades
           } else {
-            marsDescription.visible = false;
+            marsDescription.visible = false; // Ocultar descripción si el jugador está a más de 100 unidades
           }
         }
       }
