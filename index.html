@@ -3,315 +3,84 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Space App</title>
+    <title>Rocket Game</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <script src="./js/pixi.min.js"></script>
     <style>
-      #container {
-        width: 100%;
-        background-color: rgba(0, 0, 0, 0.7); /* semi-transparent black */
-        color: white;
-        padding: 20px;
-        box-sizing: border-box;
-        display: none; /* hidden by default */
+      #canvas-container {
+        width: 800px;
+        height: 800px;
       }
-      /* Make the canvas responsive */
-      canvas {
-        max-width: 100%;
-        height: auto;
+      #popup-container {
+        margin: 5vw;
       }
     </style>
-    <script src="./js/pixi.min.js"></script>
-    <script>
-      let app;
-      let player;
-      let key = {};
-      let canvasContainer;
-
-      let itineraryContainer;
-      let marsDescription;
-      let marsBanner;
-
-      let itinerary = [];
-      let touchStartPos = { x: 0, y: 0 };
-
-      // Clase para el jugador
-      class Player {
-        constructor(x, y, texture) {
-          this.sprite = PIXI.Sprite.from(texture);
-          this.sprite.anchor.set(0.5);
-          this.sprite.x = x;
-          this.sprite.y = y;
-        }
-
-        // Mover hacia arriba
-        moveUp() {
-          if (this.sprite.y - this.sprite.height / 2 > 0) this.sprite.y -= 2.5;
-        }
-
-        // Mover hacia abajo
-        moveDown() {
-          if (this.sprite.y + this.sprite.height / 2 < app.view.height)
-            this.sprite.y += 2.5;
-        }
-
-        // Mover a la izquierda
-        moveLeft() {
-          if (this.sprite.x - this.sprite.width / 2 > 0) this.sprite.x -= 2.5;
-        }
-
-        // Mover a la derecha
-        moveRight() {
-          if (this.sprite.x + this.sprite.width / 2 < app.view.width)
-            this.sprite.x += 2.5;
-        }
-
-        // Calcular distancia a otro objeto
-        distanceTo(obj) {
-          let dx = this.sprite.x - obj.x;
-          let dy = this.sprite.y - obj.y;
-          return Math.sqrt(dx * dx + dy * dy);
-        }
-      }
-
-      // Función principal al cargar la ventana
-      window.onload = function () {
-        // Initialize PIXI application with window dimensions
-        app = new PIXI.Application({
-          width: window.innerWidth,
-          height: window.innerHeight,
-          backgroundColor: 0xaaaaaa,
-        });
-
-        // Resize the canvas when the window is resized
-        window.addEventListener("resize", function () {
-          app.renderer.resize(window.innerWidth, window.innerHeight);
-        });
-
-        document.body.appendChild(app.view);
-        canvasContainer = document.querySelector("#canvas-container");
-        itineraryContainer = document.querySelector("#itinerary-container");
-
-        // Inicializar el jugador, fondo y otros elementos
-        initializePlayer();
-        drawBackgroundAssets();
-        drawControlPanel();
-        drawSeats();
-        drawWindows();
-        clickableBanner();
-
-        // Dibujar paredes y botón de itinerario
-        drawWalls();
-        drawItineraryButton();
-      };
-
-      // Inicializar el jugador
-      function initializePlayer() {
-        player = new Player(
-          app.view.width / 2,
-          app.view.height / 2,
-          "./images/player.png"
-        );
-        app.stage.addChild(player.sprite);
-
-        // Eventos de teclado
-        window.addEventListener("keydown", keysDown);
-        window.addEventListener("keyup", keysUp);
-
-        // Bucle principal del juego
-        app.ticker.add(gameLoop);
-
-        // Add touch event listeners for mobile controls
-        app.view.addEventListener("touchstart", handleTouchStart);
-        app.view.addEventListener("touchmove", handleTouchMove);
-      }
-
-      // Dibujar paredes
-      function drawWalls() {
-        let wallThickness = 10; // Adjust as needed
-
-        let topWall = new PIXI.Graphics();
-        topWall.beginFill(0x000000); // Black color for the wall
-        topWall.drawRect(0, 0, app.view.width, wallThickness);
-        app.stage.addChild(topWall);
-
-        let bottomWall = new PIXI.Graphics();
-        bottomWall.beginFill(0x000000);
-        bottomWall.drawRect(
-          0,
-          app.view.height - wallThickness,
-          app.view.width,
-          wallThickness
-        );
-        app.stage.addChild(bottomWall);
-
-        let leftWall = new PIXI.Graphics();
-        leftWall.beginFill(0x000000);
-        leftWall.drawRect(0, 0, wallThickness, app.view.height);
-        app.stage.addChild(leftWall);
-
-        let rightWall = new PIXI.Graphics();
-        rightWall.beginFill(0x000000);
-        rightWall.drawRect(
-          app.view.width - wallThickness,
-          0,
-          wallThickness,
-          app.view.height
-        );
-        app.stage.addChild(rightWall);
-      }
-
-      // Dibujar fondo
-      function drawBackgroundAssets() {
-        let background = PIXI.Sprite.from("./images/space_background.jpg");
-        background.width = app.view.width; // Stretch the background to fit the canvas
-        background.height = app.view.height;
-        app.stage.addChildAt(background, 0); // Ensure the background is the bottom-most layer
-      }
-
-      // Dibujar panel de control
-      function drawControlPanel() {
-        let controlPanel = PIXI.Sprite.from("./images/panel.png");
-        controlPanel.position.set(50, app.view.height - 150); // Example position
-        app.stage.addChild(controlPanel);
-      }
-
-      // Dibujar asientos
-      function drawSeats() {
-        let seat = PIXI.Sprite.from("./images/seat.png");
-        seat.position.set(200, app.view.height - 100); // Example position
-        app.stage.addChild(seat);
-      }
-
-      // Dibujar ventanas
-      function drawWindows() {
-        let windowView = PIXI.Sprite.from("./images/window.png");
-        windowView.position.set(400, 50); // Example position
-        app.stage.addChild(windowView);
-      }
-
-      // Dibujar banner interactivo
-      function clickableBanner() {
-        marsBanner = PIXI.Sprite.from("./images/mars_banner.png");
-        marsBanner.position.set(600, 300); // Example position
-        app.stage.addChild(marsBanner);
-
-        marsDescription = new PIXI.Text("Mars is the fourth planet...", {
-          fontFamily: "Arial",
-          fontSize: 24,
-          fill: 0xffffff,
-        });
-        marsDescription.position.set(580, 350); // Adjust position as needed
-        marsDescription.visible = false; // Start off hiddena
-        marsDescription.interactive = true;
-        marsDescription.buttonMode = true;
-        marsDescription.on("pointerdown", function () {
-          addToItinerary("Mars");
-          redirectToMarsPage();
-        });
-
-        app.stage.addChild(marsDescription);
-      }
-
-      // Redirigir a la página de Marte
-      function redirectToMarsPage() {
-        window.open("https://www.nasa.gov/planet-mars", "_blank");
-      }
-
-      // Eventos de teclado
-      function keysDown(e) {
-        if ([87, 65, 83, 68].includes(e.keyCode)) {
-          key[e.keyCode] = true;
-        }
-      }
-
-      function keysUp(e) {
-        if ([87, 65, 83, 68].includes(e.keyCode)) {
-          key[e.keyCode] = false;
-        }
-      }
-
-      // Dibujar botón de itinerario
-      function drawItineraryButton() {
-        let viewItineraryButton = PIXI.Sprite.from(
-          "./images/view_itinerary_icon.png"
-        );
-        viewItineraryButton.position.set(700, 50); // Example position
-        viewItineraryButton.interactive = true;
-        viewItineraryButton.buttonMode = true;
-        viewItineraryButton.on("pointerdown", function () {
-          // Logic to display the itinerary, e.g., show the container div
-          itineraryContainer.style.display = "block";
-        });
-        app.stage.addChild(viewItineraryButton);
-      }
-
-      // Actualizar visualización del itinerario
-      function updateItineraryDisplay() {
-        let itineraryList = "<ul>";
-        for (let destination of itinerary) {
-          itineraryList += `<li>${destination}</li>`;
-        }
-        itineraryList += "</ul>";
-        itineraryContainer.innerHTML = itineraryList;
-      }
-
-      // Añadir al itinerario
-      function addToItinerary(celestialBody) {
-        if (!itinerary.includes(celestialBody)) {
-          itinerary.push(celestialBody);
-          updateItineraryDisplay();
-        }
-      }
-
-      function handleTouchStart(e) {
-        touchStartPos.x = e.touches[0].clientX;
-        touchStartPos.y = e.touches[0].clientY;
-      }
-
-      function handleTouchMove(e) {
-        let touchCurrentPos = {
-          x: e.touches[0].clientX,
-          y: e.touches[0].clientY,
-        };
-
-        let dx = touchCurrentPos.x - touchStartPos.x;
-        let dy = touchCurrentPos.y - touchStartPos.y;
-
-        if (Math.abs(dx) > Math.abs(dy)) {
-          // Horizontal movement
-          if (dx > 0) player.moveRight();
-          else player.moveLeft();
-        } else {
-          // Vertical movement
-          if (dy > 0) player.moveDown();
-          else player.moveUp();
-        }
-
-        // Update start position for next movement
-        touchStartPos = touchCurrentPos;
-      }
-
-      // Bucle principal del juego
-      function gameLoop() {
-        // Actualizar la posición del jugador según las teclas presionadas
-        if (key[87]) player.moveUp(); // Mover hacia arriba con la tecla W
-        if (key[65]) player.moveLeft(); // Mover a la izquierda con la tecla A
-        if (key[83]) player.moveDown(); // Mover hacia abajo con la tecla S
-        if (key[68]) player.moveRight(); // Mover a la derecha con la tecla D
-
-        // Lógica del banner: mostrar descripción si el jugador está cerca
-        let dist = player.distanceTo(marsBanner);
-        if (marsDescription) {
-          if (dist < 100) {
-            marsDescription.visible = true; // Mostrar descripción si el jugador está a menos de 100 unidades
-          } else {
-            marsDescription.visible = false; // Ocultar descripción si el jugador está a más de 100 unidades
-          }
-        }
-      }
-    </script>
   </head>
   <body>
-    <section id="canvas-container"></section>
-    <section id="itinerary-container"></section>
+    <main class="container-fluid">
+      <div class="row">
+        <section id="canvas-container" class="col-9">
+          <!-- PIXI Canvas will be appended here -->
+        </section>
+        <section id="popup-container" style="display: none" class="col-3">
+          <div id="popup-content">
+            <h1>Planet Reached</h1>
+            <p>Congratulations! You've reached a planet.</p>
+            <button id="continue-btn" class="btn btn-primary">
+              Continue Traveling
+            </button>
+            <button id="secure-landing-btn" class="btn btn-secondary">
+              Secure Landing
+            </button>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      let container = document.getElementById("canvas-container");
+      let app = new PIXI.Application({
+        width: container.offsetWidth,
+        height: container.offsetHeight,
+        backgroundColor: 0x000000,
+      });
+      container.appendChild(app.view);
+
+      window.addEventListener("resize", resizeCanvas);
+
+      function resizeCanvas() {
+        let newWidth = container.offsetWidth;
+        let newHeight = container.offsetHeight;
+
+        app.renderer.resize(newWidth, newHeight);
+
+        // Adjust game elements if needed, e.g., repositioning the rocket at the bottom center
+        rocket.x = newWidth / 2 - rocket.width / 2;
+        rocket.y = newHeight - rocket.height - 10;
+      }
+
+      PIXI.Loader.shared
+        .add("rocket", "./images/player.png")
+        .add("asteroid", "./images/seat.png")
+        .add("planet", "./images/panel.png")
+        .load(() => {
+          setupRocketAsteroid();
+          setupPlanet();
+
+          resizeCanvas(); // Ensure everything is placed correctly after setup
+
+          // Start the game loop after setting up
+          app.ticker.add((delta) => {
+            gameLoopRocketAsteroid(delta);
+            gameLoopPlanet(delta);
+          });
+        });
+    </script>
+    <script src="./js/rocketObjects.js"></script>
+    <script src="./js/planet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>
