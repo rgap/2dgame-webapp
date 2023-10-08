@@ -10,13 +10,20 @@
         padding: 0;
         margin: 0;
       }
-      #game-container {
-        /* height will be set dynamically by JavaScript */
+
+      body {
+        overflow: hidden;
       }
+
+      #game-container {
+        height: 100vh;
+      }
+
       #canvas-container {
         width: 60%;
         height: 100%;
       }
+
       #popup-container {
         height: 100%;
         margin: auto;
@@ -56,6 +63,14 @@
     </main>
 
     <script>
+      document.addEventListener(
+        "touchmove",
+        function (e) {
+          e.preventDefault();
+        },
+        { passive: false }
+      );
+
       let container = document.getElementById("canvas-container");
       let app = new PIXI.Application({
         width: container ? container.offsetWidth : 800, // Default to 800 if container is not yet accessible
@@ -67,21 +82,12 @@
         container.appendChild(app.view);
       }
 
-      function setGameContainerHeight() {
-        const gameContainer = document.getElementById("game-container");
-        gameContainer.style.height = window.innerHeight + "px";
-      }
-
       document.addEventListener("DOMContentLoaded", function () {
-        setGameContainerHeight();
-
-        // This is to ensure that app.view is appended once the DOM is fully loaded
         if (!container) {
           container = document.getElementById("canvas-container");
           container.appendChild(app.view);
         }
 
-        window.addEventListener("resize", setGameContainerHeight);
         window.addEventListener("resize", resizeCanvas);
 
         function resizeCanvas() {
