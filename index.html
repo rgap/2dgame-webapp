@@ -13,7 +13,8 @@
       #canvas-container {
         width: 60%;
         max-height: 800px; /* Default height */
-        min-height: 100px; /* Ensure it doesn't collapse below this height */
+        min-height: 300px; /* Ensure it doesn't collapse below this height */
+        height: 100vh;
       }
 
       #popup-container {
@@ -29,7 +30,7 @@
       <!-- Flex container -->
       <section class="flex">
         <!-- 70% width for canvas-container -->
-        <section id="canvas-container" class="h-[800px]">
+        <section id="canvas-container">
           <!-- PIXI Canvas will be appended here -->
         </section>
         <!-- 30% width for popup-container -->
