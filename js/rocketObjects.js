@@ -54,26 +54,3 @@ document.addEventListener("keydown", function (event) {
     }
   }
 });
-
-// Touch controls for mobile
-app.view.addEventListener("touchstart", function (event) {
-  const touchX = event.touches[0].clientX; // Get the X coordinate of the touch point
-  const halfWidth = window.innerWidth / 2; // Calculate the center of the screen
-
-  if (rocket && !rocketStopped) {
-    if (touchX < halfWidth) {
-      // Touch is on the left side of the screen
-      rocketDirection = -1;
-    } else {
-      // Touch is on the right side of the screen
-      rocketDirection = 1;
-    }
-  }
-});
-
-// Optionally, stop the rocket's movement when the touch ends
-app.view.addEventListener("touchend", function () {
-  if (rocket && !rocketStopped) {
-    rocketDirection = 0; // Stop the rocket
-  }
-});
