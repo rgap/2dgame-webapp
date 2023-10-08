@@ -58,44 +58,41 @@
 
     <script>
       let container, app;
-
-      document.addEventListener("DOMContentLoaded", function (event) {
-        container = document.getElementById("canvas-container");
-        app = new PIXI.Application({
-          width: container.offsetWidth,
-          height: container.offsetHeight,
-          backgroundColor: 0x000000,
-        });
-        container.appendChild(app.view);
-
-        window.addEventListener("resize", resizeCanvas);
-
-        function resizeCanvas() {
-          let newWidth = container.offsetWidth;
-          let newHeight = container.offsetHeight;
-
-          app.renderer.resize(newWidth, newHeight);
-
-          rocket.x = newWidth / 2 - rocket.width / 2;
-          rocket.y = newHeight - rocket.height - 10;
-        }
-
-        PIXI.Loader.shared
-          .add("rocket", "./images/player.png")
-          .add("asteroid", "./images/seat.png")
-          .add("planet", "./images/panel.png")
-          .load(() => {
-            setupRocketAsteroid();
-            setupPlanet();
-
-            resizeCanvas();
-
-            app.ticker.add((delta) => {
-              gameLoopRocketAsteroid(delta);
-              gameLoopPlanet(delta);
-            });
-          });
+      container = document.getElementById("canvas-container");
+      app = new PIXI.Application({
+        width: container.offsetWidth,
+        height: container.offsetHeight,
+        backgroundColor: 0x000000,
       });
+      container.appendChild(app.view);
+
+      window.addEventListener("resize", resizeCanvas);
+
+      function resizeCanvas() {
+        let newWidth = container.offsetWidth;
+        let newHeight = container.offsetHeight;
+
+        app.renderer.resize(newWidth, newHeight);
+
+        rocket.x = newWidth / 2 - rocket.width / 2;
+        rocket.y = newHeight - rocket.height - 10;
+      }
+
+      PIXI.Loader.shared
+        .add("rocket", "./images/player.png")
+        .add("asteroid", "./images/seat.png")
+        .add("planet", "./images/panel.png")
+        .load(() => {
+          setupRocketAsteroid();
+          setupPlanet();
+
+          resizeCanvas();
+
+          app.ticker.add((delta) => {
+            gameLoopRocketAsteroid(delta);
+            gameLoopPlanet(delta);
+          });
+        });
     </script>
     <script src="./js/rocketObjects.js"></script>
     <script src="./js/planet.js"></script>
