@@ -56,7 +56,16 @@
     </main>
 
     <script>
-      let container, app;
+      let container = document.getElementById("canvas-container");
+      let app = new PIXI.Application({
+        width: container ? container.offsetWidth : 800, // Default to 800 if container is not yet accessible
+        height: container ? container.offsetHeight : 600, // Default to 600 if container is not yet accessible
+        backgroundColor: 0x000000,
+      });
+
+      if (container) {
+        container.appendChild(app.view);
+      }
 
       function setGameContainerHeight() {
         const gameContainer = document.getElementById("game-container");
@@ -66,13 +75,11 @@
       document.addEventListener("DOMContentLoaded", function () {
         setGameContainerHeight();
 
-        container = document.getElementById("canvas-container");
-        app = new PIXI.Application({
-          width: container.offsetWidth,
-          height: container.offsetHeight,
-          backgroundColor: 0x000000,
-        });
-        container.appendChild(app.view);
+        // This is to ensure that app.view is appended once the DOM is fully loaded
+        if (!container) {
+          container = document.getElementById("canvas-container");
+          container.appendChild(app.view);
+        }
 
         window.addEventListener("resize", setGameContainerHeight);
         window.addEventListener("resize", resizeCanvas);
