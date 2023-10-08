@@ -2,39 +2,45 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <!-- This can help prevent unwanted zoom -->
     <title>Rocket Game</title>
     <script src="./js/pixi.min.js"></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@3.0.9/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
     <style>
       * {
         padding: 0;
         margin: 0;
       }
       #canvas-container {
-        width: 60vw;
+        width: 70%; /* 70% width */
         height: 800px; /* Default height */
-        min-height: 800px; /* Ensure it doesn't collapse below this height */
+        min-height: 80vh; /* 80% of the viewport height */
       }
 
       #popup-container {
+        width: 30%; /* 30% width */
         height: 100%;
-        margin: auto;
-        width: 30vw;
       }
     </style>
   </head>
 
   <body class="bg-gray-100">
     <main>
-      <!-- Flex container -->
-      <section class="flex">
-        <!-- 70% width for canvas-container -->
-        <section id="canvas-container" class="h-[800px]">
+      <section class="flex h-screen">
+        <!-- Ensure flex container covers the entire screen height -->
+        <section id="canvas-container">
           <!-- PIXI Canvas will be appended here -->
         </section>
-        <!-- 30% width for popup-container -->
         <section id="popup-container" class="" style="display: none">
-          <div id="popup-content">
+          <div id="popup-content" class="m-5">
+            <!-- Added some margin for spacing -->
             <h1 class="text-xl mb-4">Planet Reached</h1>
             <p class="mb-4">Congratulations! You've reached a planet.</p>
             <button
@@ -97,6 +103,5 @@
     </script>
     <script src="./js/rocketObjects.js"></script>
     <script src="./js/planet.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
   </body>
 </html>
