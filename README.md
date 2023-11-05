@@ -10,4 +10,4 @@ A simple web-based game about space traveling. It was developed for a Space Apps
 
 ## Online demo
 
-https://rgap.github.io/game2d-webapp/
+https://rgap.github.io/rgap-web-game2d/
